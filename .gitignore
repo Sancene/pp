@@ -1,6 +1,6 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/c++,visualstudio,windows
-# Edit at https://www.toptal.com/developers/gitignore?templates=c++,visualstudio,windows
+# Created by https://www.toptal.com/developers/gitignore/api/c++,windows,visualstudio
+# Edit at https://www.toptal.com/developers/gitignore?templates=c++,windows,visualstudio
 
 ### C++ ###
 # Prerequisites
@@ -426,4 +426,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# End of https://www.toptal.com/developers/gitignore/api/c++,visualstudio,windows
+# End of https://www.toptal.com/developers/gitignore/api/c++,windows,visualstudio
