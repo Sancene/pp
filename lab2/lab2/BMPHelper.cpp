@@ -66,6 +66,7 @@ void BMPHelper::BlurByWidth(BMPFILE* originalBmp, BMPFILE* bluredBmp, int startW
 					g += pixel.g * wght;
 					b += pixel.b * wght;
 					wsum += wght;
+
 				}
 			}
 
