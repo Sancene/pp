@@ -1,6 +1,7 @@
 ﻿#include <windows.h>
 #include <string>
 #include <iostream>
+#include <stdlib.h>
 
 CRITICAL_SECTION CriticalSection;
 
@@ -10,11 +11,11 @@ DWORD WINAPI ThreadProc(CONST LPVOID lpParam)
 
 	int* working_variable = (int*)lpParam;
 	int variable = *working_variable;
-
+	srand(time(0));
 	for (int i = 0; i < 5; i++) {
 		int j = *working_variable;
 		int k = variable;
-		int a = rand() % 10;
+		int a = rand() % 10 + 1;
 		*working_variable = j + a;
 		variable = k + a;
 	}
@@ -31,6 +32,7 @@ DWORD WINAPI ThreadProc(CONST LPVOID lpParam)
 int main(int argc)
 {
 	int working_variable = 0;
+	int coreCount = 2;
 
 	if (!InitializeCriticalSectionAndSpinCount(&CriticalSection,
 		0x00000400))
@@ -40,6 +42,7 @@ int main(int argc)
 
 	for (int i = 0; i < 2; i++) {
 		handles[i] = CreateThread(NULL, i, &ThreadProc, &working_variable, CREATE_SUSPENDED, NULL);
+		SetThreadAffinityMask(handles[i], (1 << coreCount) - 1);
 	}
 
 	for (int i = 0; i < 2; i++) {
