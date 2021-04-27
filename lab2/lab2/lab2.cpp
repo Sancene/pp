@@ -2,10 +2,10 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <windows.h>
 #include <time.h>
 #include "BMPFILE.h"
 #include "BMPHelper.h"
+#include "LogBuffer.h"
 
 struct Params
 {
@@ -14,6 +14,7 @@ struct Params
 	std::ofstream* fout;
 	BMPFILE* bmp;
 	BMPFILE* blured;
+	LogBuffer* logbuffer;
 	int start;
 	int end;
 };
@@ -21,7 +22,7 @@ struct Params
 DWORD WINAPI ThreadProc(CONST LPVOID lpParam)
 {
 	struct Params* params = (struct Params*)lpParam;
-	BMPHelper::BlurByWidth(&*params->bmp, &*params->blured, params->start, params->end, &*params->fout, params->startTime, params->threadNumber);
+	BMPHelper::BlurByWidth(&*params->bmp, &*params->blured, params->start, params->end, &*params->fout, params->startTime, params->threadNumber, params->logbuffer);
 	ExitThread(0);
 }
 
@@ -45,6 +46,7 @@ int main(int argc, char* argv[])
 	std::vector<std::ofstream> outFiles;
 
 	BMPFILE bmp = BMPHelper::ReadFromFile(bmpFileName);
+	LogBuffer logBuffer;
 
 	if (bmp.GetPixels().size() == 0)
 	{
@@ -80,6 +82,7 @@ int main(int argc, char* argv[])
 		params.blured = &blured;
 		params.start = minWidth;
 		params.end = i == threadsCount - 1 ? bmp.GetWidth() - 1 : minWidth + width;
+		params.logbuffer = &logBuffer;
 		paramsToThread.push_back(params);
 		minWidth += width;
 	}

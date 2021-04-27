@@ -42,7 +42,7 @@ BMPFILE BMPHelper::ReadFromFile(std::string path)
 	return BMPFILE(bmpInfo, pixels);
 }
 
-void BMPHelper::BlurByWidth(BMPFILE* originalBmp, BMPFILE* bluredBmp, int startWidth, int endWidth, std::ofstream* fout, clock_t startTime, int threadNumber, int radius)
+void BMPHelper::BlurByWidth(BMPFILE* originalBmp, BMPFILE* bluredBmp, int startWidth, int endWidth, std::ofstream* fout, clock_t startTime, int threadNumber, LogBuffer* logbuffer , int radius)
 {
 	float rs = std::ceil(radius * 2.57);
 	for (int i = 0; i < originalBmp->GetHeight() - 1; ++i)
@@ -56,8 +56,8 @@ void BMPHelper::BlurByWidth(BMPFILE* originalBmp, BMPFILE* bluredBmp, int startW
 			{
 				for (int ix = j - rs; ix < j + rs + 1; ++ix)
 				{
-					auto x = std::min(static_cast<int>(endWidth) - 1, std::max(0, ix));
-					auto y = std::min(static_cast<int>(originalBmp->GetHeight()) - 1, std::max(0, iy));
+					auto x = (std::min)(static_cast<int>(endWidth) - 1, (std::max)(0, ix));
+					auto y = (std::min)(static_cast<int>(originalBmp->GetHeight()) - 1, (std::max)(0, iy));
 					auto dsq = ((ix - j) * (ix - j)) + ((iy - i) * (iy - i));
 					auto wght = std::exp(-dsq / (2.0 * radius * radius)) / (M_PI * 2.0 * radius * radius);
 
@@ -77,7 +77,10 @@ void BMPHelper::BlurByWidth(BMPFILE* originalBmp, BMPFILE* bluredBmp, int startW
 			bluredPixel.b = std::round(b / wsum);
 			bluredBmp->SetPixel(j, i, bluredPixel);
 
+			int time = timeGetTime() - startTime;
+			logbuffer->Log(time);
 			*fout << clock() - startTime << std::endl;
+
 		}
 	}
 }
