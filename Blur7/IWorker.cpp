@@ -2,55 +2,36 @@
 
 extern CRITICAL_SECTION CriticalSection;
 
-struct IWorkerStruct
+DWORD WINAPI ThreadProc(LPVOID lpParam)
 {
-	ITask& task;
-};
+	//IWorkerStruct* refinedData = (IWorkerStruct*)lpParam;
+	auto task = (ITask*)lpParam;
 
-DWORD WINAPI ThreadProc(CONST LPVOID lpParam)
-{
-	IWorkerStruct* refinedData = (IWorkerStruct*)lpParam;
-	ITask& task = refinedData->task;
-
-	EnterCriticalSection(&CriticalSection);
-	task.Execute();
-	LeaveCriticalSection(&CriticalSection);
+	//EnterCriticalSection(&CriticalSection);
+	task->Execute();
+	//LeaveCriticalSection(&CriticalSection);
 	ExitThread(0);
 }
 
 bool IWorker::ExecuteTask(ITask* taskToRun)
 {
-	if (_end)
+	if (IsBusy())
 	{
+		std::cout << "busy\n";
 		return false;
 	}
-
-	IWorkerStruct* dataToSend = new IWorkerStruct{ *taskToRun };
-	HANDLE newHandle = CreateThread(NULL, 0, &ThreadProc, (LPVOID)(dataToSend), CREATE_SUSPENDED, NULL);
-	
-	_handles.push_back(newHandle);
-	if (_handles.size() == 1)
+	if(m_thread = CreateThread(NULL, 0, &ThreadProc, taskToRun, CREATE_SUSPENDED, NULL))
 	{
-		ResumeThread(_handles.front());
-	}
-
-	WaitForSingleObject(_handles.back(), INFINITE);
-	if (_handles.size() > 0 and !_end)
-	{
-		ResumeThread(_handles.front());
-	}
-	_handles.erase(_handles.begin());
-
-	if (_end)
-	{
+		ResumeThread(m_thread);
 		return false;
 	}
-
-	return true;
+	return false;
 }
 
 bool IWorker::IsBusy()
 {
-	return _handles.size() > 0;
+	DWORD exitcode;
+	GetExitCodeThread(m_thread, &exitcode);
+	return exitcode == STILL_ACTIVE;
 }
 

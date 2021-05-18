@@ -9,28 +9,18 @@ extern CRITICAL_SECTION CriticalSection;
 class IWorker
 {
 private:
-	std::vector<HANDLE> _handles;
+	HANDLE m_thread;
 	bool _bisy = false;
 	bool _end = false;
 
 public:
 	IWorker()
 	{
-		InitializeCriticalSectionAndSpinCount(&CriticalSection, 0x00000400);
 	}
 
 	~IWorker()
 	{
-		_end = true;
-		if (!_handles.empty())
-		{
-			WaitForSingleObject(_handles.front(), INFINITE);
-			for (auto i = _handles.begin(); i != _handles.end(); i++)
-			{
-				TerminateThread(*i, 1);
-			}
-		}
-		DeleteCriticalSection(&CriticalSection);
+		WaitForSingleObject(m_thread, INFINITE);
 	}
 
 	bool ExecuteTask(ITask* taskToRun);
